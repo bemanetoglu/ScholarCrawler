@@ -19,14 +19,20 @@ public class Article {
     private String citingLink;
     private ArrayList<Author> author;
     private int citing;
+    boolean isParent;
 
-    Article(String articleName, ArrayList<Author> authors, String articleLink, String desc, String citingLink, int citingNumber) {
+    Article(String articleName, ArrayList<Author> authors, String articleLink, String desc, String citingLink, int citingNumber, boolean isParent) {
         this.name = articleName;
         this.author = authors;
         this.link = articleLink;
         this.description = desc;
         this.citingLink = citingLink;
         this.citing = citingNumber;
+        this.isParent = isParent;
+    }
+
+    Article() {
+
     }
 
     public String getName() {

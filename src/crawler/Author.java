@@ -19,6 +19,10 @@ public class Author {
         this.link = authorLink;
     }
 
+    Author() {
+
+    }
+
     public String getName() {
         return this.name;
     }
