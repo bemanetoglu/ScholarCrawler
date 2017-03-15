@@ -21,8 +21,7 @@ import javax.swing.DefaultListModel;
 public class Interface extends javax.swing.JFrame {
 
     private final DefaultListModel dfm = new DefaultListModel();
-    
-
+    private static String selected="";
 
     public Interface() throws SQLException {
         initComponents();
@@ -40,8 +39,9 @@ public class Interface extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         queryTxt = new javax.swing.JTextField();
         crawlButton = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        articleList = new javax.swing.JList<>();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        artcList = new javax.swing.JList<>();
+        optTitle = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -54,22 +54,36 @@ public class Interface extends javax.swing.JFrame {
             }
         });
 
-        jScrollPane1.setViewportView(articleList);
+        artcList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                artcListMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(artcList);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(140, 140, 140)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(queryTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(crawlButton)
-                .addContainerGap(161, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane2))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(140, 140, 140)
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(queryTxt, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(crawlButton))
+                            .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(optTitle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(303, 303, 303)))
+                        .addGap(151, 151, 151)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -80,9 +94,11 @@ public class Interface extends javax.swing.JFrame {
                     .addComponent(jLabel1)
                     .addComponent(queryTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(crawlButton))
+                .addGap(24, 24, 24)
+                .addComponent(optTitle, javax.swing.GroupLayout.DEFAULT_SIZE, 8, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(42, 42, 42))
         );
 
         pack();
@@ -90,20 +106,37 @@ public class Interface extends javax.swing.JFrame {
 
     private void crawlButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_crawlButtonActionPerformed
         try {
-            Crawler.setQuery(queryTxt.getText());
-            Crawler.crawl();
-            Crawler.getArticleList().stream().forEach((a) -> {
-                dfm.addElement(a.getName());
-            });
-            articleList.setModel(dfm);
-            
-        } catch (IOException ex) {
-            Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
+            optTitle.setText("");
+            dfm.clear();
+            System.out.println("liste: "+selected);
+            if (!"".equals(selected)) {
+                optTitle.setText("Articles that cited ("+ selected+")");
+                Crawler.setQuery("");
+                Crawler.setArticleName(selected);
+                Crawler.crawl();
+                Crawler.getArticleList().stream().forEach((a) -> {
+                    dfm.addElement(a.getName());
+                });
+                artcList.setModel(dfm);
+                selected="";
+            } else {
+                optTitle.setText("Articles about ("+ queryTxt.getText()+")");
+                Crawler.setQuery(queryTxt.getText());
+                Crawler.crawl();
+                Crawler.getArticleList().stream().forEach((a) -> {
+                    dfm.addElement(a.getName());
+                });
+                artcList.setModel(dfm);
+            }
+        } catch (IOException | SQLException ex) {
             Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }//GEN-LAST:event_crawlButtonActionPerformed
+
+    private void artcListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_artcListMouseClicked
+        selected=artcList.getSelectedValue();
+    }//GEN-LAST:event_artcListMouseClicked
 
     /**
      * @param args the command line arguments
@@ -147,10 +180,11 @@ public class Interface extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JList<String> articleList;
+    private javax.swing.JList<String> artcList;
     private javax.swing.JButton crawlButton;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel optTitle;
     private javax.swing.JTextField queryTxt;
     // End of variables declaration//GEN-END:variables
 }
