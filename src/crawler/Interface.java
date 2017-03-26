@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -21,7 +22,7 @@ import javax.swing.DefaultListModel;
 public class Interface extends javax.swing.JFrame {
 
     private final DefaultListModel dfm = new DefaultListModel();
-    private static String selected="";
+    private static String selected = "";
 
     public Interface() throws SQLException {
         initComponents();
@@ -108,26 +109,36 @@ public class Interface extends javax.swing.JFrame {
         try {
             optTitle.setText("");
             dfm.clear();
-            System.out.println("liste: "+selected);
-            if (!"".equals(selected)) {
-                optTitle.setText("Articles that cited ("+ selected+")");
-                Crawler.setQuery("");
-                Crawler.setArticleName(selected);
-                Crawler.crawl();
-                Crawler.getArticleList().stream().forEach((a) -> {
-                    dfm.addElement(a.getName());
-                });
-                artcList.setModel(dfm);
-                selected="";
-            } else {
-                optTitle.setText("Articles about ("+ queryTxt.getText()+")");
-                Crawler.setQuery(queryTxt.getText());
-                Crawler.crawl();
-                Crawler.getArticleList().stream().forEach((a) -> {
-                    dfm.addElement(a.getName());
-                });
-                artcList.setModel(dfm);
+//            System.out.println("liste: "+selected);
+//            if (!"".equals(selected)) {
+//                optTitle.setText("Articles that cited ("+ selected+")");
+//                Crawler.setQuery("");
+//                Crawler.setArticleName(selected);
+//                Crawler.crawlSettings();
+//                Crawler.getArticleList().stream().forEach((a) -> {
+//                    dfm.addElement(a.getName());
+//                });
+//                artcList.setModel(dfm);
+//                selected="";
+//            } else {
+            optTitle.setText("Articles about (" + queryTxt.getText() + ")");
+            Crawler.setQuery(queryTxt.getText());
+            Crawler.crawlSettings();
+            
+            //correction of misspelling
+            if (!"".equals(Crawler.getDidYouMean())) {
+                JOptionPane.showMessageDialog(null, Crawler.getDidYouMean(), "Misspelling Detected", JOptionPane.WARNING_MESSAGE);
+                optTitle.setText("Articles about (" + Crawler.getDidYouMean() + ")");
+                queryTxt.setText(Crawler.getDidYouMean());
+                Crawler.setQuery(Crawler.getDidYouMean());
+                Crawler.crawlSettings();
             }
+            Crawler.getArticleList().stream().forEach((a) -> {
+                dfm.addElement(a.getName());
+            });
+            artcList.setModel(dfm);
+//            }
+
         } catch (IOException | SQLException ex) {
             Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -135,7 +146,7 @@ public class Interface extends javax.swing.JFrame {
     }//GEN-LAST:event_crawlButtonActionPerformed
 
     private void artcListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_artcListMouseClicked
-        selected=artcList.getSelectedValue();
+        selected = artcList.getSelectedValue();
     }//GEN-LAST:event_artcListMouseClicked
 
     /**
