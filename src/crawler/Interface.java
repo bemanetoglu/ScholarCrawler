@@ -5,15 +5,16 @@
  */
 package crawler;
 
+import static crawler.Crawler.clearArticleList;
+import static crawler.Crawler.getResults;
+import static crawler.Crawler.setQueryID;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
+
 
 /**
  *
@@ -43,6 +44,7 @@ public class Interface extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         artcList = new javax.swing.JList<>();
         optTitle = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -61,6 +63,13 @@ public class Interface extends javax.swing.JFrame {
             }
         });
         jScrollPane2.setViewportView(artcList);
+
+        jButton1.setText("jButton1");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -83,7 +92,9 @@ public class Interface extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(optTitle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(303, 303, 303)))
+                                .addGap(141, 141, 141)
+                                .addComponent(jButton1)
+                                .addGap(89, 89, 89)))
                         .addGap(151, 151, 151)))
                 .addContainerGap())
         );
@@ -95,8 +106,13 @@ public class Interface extends javax.swing.JFrame {
                     .addComponent(jLabel1)
                     .addComponent(queryTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(crawlButton))
-                .addGap(24, 24, 24)
-                .addComponent(optTitle, javax.swing.GroupLayout.DEFAULT_SIZE, 8, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addComponent(optTitle, javax.swing.GroupLayout.DEFAULT_SIZE, 8, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton1)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(42, 42, 42))
@@ -109,35 +125,25 @@ public class Interface extends javax.swing.JFrame {
         try {
             optTitle.setText("");
             dfm.clear();
-//            System.out.println("liste: "+selected);
-//            if (!"".equals(selected)) {
-//                optTitle.setText("Articles that cited ("+ selected+")");
-//                Crawler.setQuery("");
-//                Crawler.setArticleName(selected);
-//                Crawler.crawlSettings();
-//                Crawler.getArticleList().stream().forEach((a) -> {
-//                    dfm.addElement(a.getName());
-//                });
-//                artcList.setModel(dfm);
-//                selected="";
-//            } else {
             optTitle.setText("Articles about (" + queryTxt.getText() + ")");
             Crawler.setQuery(queryTxt.getText());
             Crawler.crawlSettings();
-            
+
             //correction of misspelling
             if (!"".equals(Crawler.getDidYouMean())) {
-                JOptionPane.showMessageDialog(null, Crawler.getDidYouMean(), "Misspelling Detected", JOptionPane.WARNING_MESSAGE);
-                optTitle.setText("Articles about (" + Crawler.getDidYouMean() + ")");
+                JOptionPane.showMessageDialog(null, Crawler.getDidYouMean().toUpperCase(), "Misspelling Detected", JOptionPane.WARNING_MESSAGE);
+                optTitle.setText("Articles about (" + Crawler.getDidYouMean().toUpperCase() + ")");
                 queryTxt.setText(Crawler.getDidYouMean());
                 Crawler.setQuery(Crawler.getDidYouMean());
                 Crawler.crawlSettings();
             }
-            Crawler.getArticleList().stream().forEach((a) -> {
-                dfm.addElement(a.getName());
+//            Crawler.getArticleList().stream().forEach((a) -> {
+//                dfm.addElement(a.getName());
+//            });
+            Crawler.getResultNameList().stream().forEach((a) -> {
+                dfm.addElement(a);
             });
             artcList.setModel(dfm);
-//            }
 
         } catch (IOException | SQLException ex) {
             Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
@@ -148,6 +154,21 @@ public class Interface extends javax.swing.JFrame {
     private void artcListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_artcListMouseClicked
         selected = artcList.getSelectedValue();
     }//GEN-LAST:event_artcListMouseClicked
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        try {
+            System.out.println("asd");
+            setQueryID(4);
+            getResults();
+            clearArticleList();
+            Crawler.getResultNameList().stream().forEach((a) -> {
+                dfm.addElement(a);
+            });
+            artcList.setModel(dfm);
+        } catch (SQLException ex) {
+            Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -193,6 +214,7 @@ public class Interface extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList<String> artcList;
     private javax.swing.JButton crawlButton;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel optTitle;

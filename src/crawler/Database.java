@@ -207,29 +207,50 @@ public class Database {
         return "";
 
     }
+    
+    public static String getArticleName(Connection c, int articleID) throws SQLException {
 
-    public static PreparedStatement getSt() {
-        return st;
+        String sql = "SELECT article_name FROM ARTICLE WHERE article_id = ?";
+        st = c.prepareStatement(sql);
+
+        st.setInt(1, articleID);
+        rs = st.executeQuery();
+
+        if (rs.next()) {
+
+            return rs.getString("article_name");
+        }
+
+        return "";
+
     }
 
-    public static void setSt(PreparedStatement st) {
-        Database.st = st;
+    public static void deleteDuplicateArticles(Connection c, int queryID) throws SQLException {
+        String sql = "DELETE FROM ARTICLE "
+                + " WHERE NOT article_id IN "
+                + "(SELECT MIN(article_id)"
+                + " FROM ARTICLE"
+                + " GROUP BY article_link)"
+                + " AND article_query = ?";
+        st = c.prepareStatement(sql);
+        st.setInt(1, queryID);
+        st.executeUpdate();
+
     }
 
-    public static Statement getStm() {
-        return stm;
+    public static int [] getFirstTen(Connection c, int queryID) throws SQLException {
+        String sql = "SELECT * FROM ARTICLE"
+                + " WHERE article_query = ?"
+                + " ORDER BY article_citing_number desc";
+                
+        int [] firstTen = new int[10];
+        st = c.prepareStatement(sql);
+        st.setInt(1, queryID);
+        rs=st.executeQuery();
+        for (int i = 0; i < 10; i++) {
+            rs.next();
+            firstTen[i]=rs.getInt("article_id");
+        }
+        return firstTen;
     }
-
-    public static void setStm(Statement stm) {
-        Database.stm = stm;
-    }
-
-    public static ResultSet getRs() {
-        return rs;
-    }
-
-    public static void setRs(ResultSet rs) {
-        Database.rs = rs;
-    }
-
 }
